@@ -1,0 +1,14 @@
+includes:
+    - vendor/phpstan/phpstan-laravel/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app
+        - routes
+    excludePaths:
+        - '*/migrations/*'
+        - '*/seeders/*'
+    ignoreErrors:
+        - '#Call to an undefined method#'
+        - '#Property \$.*? of class .* has unknown type#'

@@ -1,0 +1,41 @@
+🔴 CRITICAL - DATABASE COLUMNS MISSING
+=====================================
+
+Error terjadi karena kolom 'category', 'stock', dan 'status' belum ditambahkan ke tabel 'products' di MySQL.
+
+SOLUSI (Pilih salah satu):
+
+METHOD 1 - Windows Command Prompt (Recommended)
+===============================================
+1. Buka Command Prompt (cmd.exe)
+2. Ketik: cd c:\Users\MSI\register-app
+3. Ketik: php artisan migrate
+4. Tunggu sampai selesai (akan melihat "Migrating" dan "Migrated")
+
+METHOD 2 - Double-Click Batch File
+===================================
+1. Buka folder c:\Users\MSI\register-app
+2. Double-click file: run-migration.bat
+
+METHOD 3 - Terminal Di VS Code
+===============================
+1. Buka VS Code
+2. Tekan Ctrl + `
+3. Ketik: php artisan migrate
+
+VERIFIKASI BERHASIL:
+====================
+Setelah migration berhasil, Anda akan melihat:
+- "Migration" messages dengan nama file migration
+- "Migrated" status
+- Tidak ada error PDOException
+
+Kemudian:
+1. Refresh browser ke http://127.0.0.1:8000/dashboard
+2. Coba update product lagi
+3. Seharusnya sudah bisa tanpa error
+
+JIKA MASIH ERROR:
+=================
+Jalankan: php artisan migrate:fresh --seed
+(WARNING: Ini akan reset semua data, hanya gunakan jika data di database tidak penting)
