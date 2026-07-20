@@ -19,6 +19,15 @@
     --color-accent: #ea580c;
     --color-accent-soft: #ffedd5;
     --color-success-soft: #dcfce7;
+
+    /* Motion tokens */
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0, 1);
+    --ease-accelerate: cubic-bezier(0.3, 0, 1, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-fast: 150ms;
+    --duration-base: 260ms;
+    --duration-slow: 420ms;
 }
 
 @layer base {
@@ -139,6 +148,66 @@
         border: 1px solid rgba(148, 163, 184, 0.18);
         background: rgba(255, 255, 255, 0.8);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-link {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 9999px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-steel);
+        border: 1px solid transparent;
+        text-decoration: none;
+        transition:
+            background 160ms var(--ease-standard),
+            color 160ms var(--ease-standard),
+            border-color 160ms var(--ease-standard),
+            transform 160ms var(--ease-standard);
+    }
+
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.7);
+        color: var(--color-ink);
+    }
+
+    .nav-link:focus-visible {
+        outline: 2px solid #0ea5e9;
+        outline-offset: 2px;
+    }
+
+    .nav-link.is-active {
+        background: linear-gradient(135deg, #0f4c81, #0ea5e9);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(14, 116, 144, 0.22);
+    }
+
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+        cursor: progress;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 1.1em;
+        height: 1.1em;
+        margin: -0.55em 0 0 -0.55em;
+        border-radius: 9999px;
+        border: 2px solid rgba(255, 255, 255, 0.45);
+        border-top-color: #fff;
+        animation: btn-spin 0.7s linear infinite;
+    }
+
+    @keyframes btn-spin {
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .eyebrow {
@@ -365,24 +434,170 @@
     }
 }
 
-@keyframes floatIn {
+/* ===================== MOTION FRAMEWORK ===================== */
+@keyframes fade-in {
     from {
         opacity: 0;
-        transform: translateY(18px);
     }
+    to {
+        opacity: 1;
+    }
+}
 
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
+@keyframes fade-in-down {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slide-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(28px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pop-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 @layer utilities {
     .float-in {
-        animation: floatIn 0.55s ease-out both;
+        animation: fade-in-up var(--duration-base) var(--ease-decelerate) both;
     }
 
     .float-in-delay {
-        animation: floatIn 0.7s ease-out both;
+        animation: fade-in-up var(--duration-slow) var(--ease-decelerate) both;
+        animation-delay: 120ms;
+    }
+
+    .animate-fade-in {
+        animation: fade-in var(--duration-base) var(--ease-standard) both;
+    }
+
+    .animate-fade-in-up {
+        animation: fade-in-up var(--duration-base) var(--ease-decelerate) both;
+    }
+
+    .animate-fade-in-down {
+        animation: fade-in-down var(--duration-base) var(--ease-decelerate) both;
+    }
+
+    .animate-scale-in {
+        animation: scale-in var(--duration-base) var(--ease-spring) both;
+    }
+
+    .animate-slide-in-right {
+        animation: slide-in-right var(--duration-slow) var(--ease-decelerate) both;
+    }
+
+    .animate-pop {
+        animation: pop-in var(--duration-slow) var(--ease-spring) both;
+    }
+}
+
+/* Staggered container: children animate in sequence.
+   The JS motion engine sets animation-delay per child; without JS we
+   fall back to the nth-child delays below. */
+.stagger > * {
+    animation: fade-in-up var(--duration-base) var(--ease-decelerate) both;
+}
+
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 70ms; }
+.stagger > *:nth-child(3) { animation-delay: 140ms; }
+.stagger > *:nth-child(4) { animation-delay: 210ms; }
+.stagger > *:nth-child(5) { animation-delay: 280ms; }
+.stagger > *:nth-child(6) { animation-delay: 350ms; }
+.stagger > *:nth-child(7) { animation-delay: 420ms; }
+.stagger > *:nth-child(8) { animation-delay: 490ms; }
+.stagger > *:nth-child(9) { animation-delay: 560ms; }
+.stagger > *:nth-child(10) { animation-delay: 630ms; }
+.stagger > *:nth-child(11) { animation-delay: 700ms; }
+.stagger > *:nth-child(12) { animation-delay: 770ms; }
+
+/* Scroll-reveal targets (progressive enhancement: only active once JS adds .motion-ready) */
+.motion-ready [data-animate] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+        opacity var(--duration-base) var(--ease-decelerate),
+        transform var(--duration-base) var(--ease-decelerate);
+    will-change: opacity, transform;
+}
+
+.motion-ready [data-animate].is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Toast/session banner entrance (runs on load, works without JS) */
+.toast-enter {
+    animation: fade-in-down var(--duration-base) var(--ease-spring) both;
+}
+
+.motion-ready [data-toast].is-leaving {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    transition:
+        opacity 320ms var(--ease-accelerate),
+        transform 320ms var(--ease-accelerate);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .motion-ready [data-animate] {
+        opacity: 1 !important;
+        transform: none !important;
     }
 }

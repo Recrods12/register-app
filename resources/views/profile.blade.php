@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profil - Booking Ruang Rapat</title>
     @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
 <body class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(14,165,233,0.08),_transparent_24%),linear-gradient(180deg,_#f8fbff_0%,_#eef4fb_100%)] text-slate-900">
     <header class="sticky top-0 z-40 border-b border-white/60 bg-white/85 backdrop-blur-xl">

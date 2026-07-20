@@ -5,94 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola User - Booking Ruang Rapat</title>
     @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
-<body class="bg-slate-50">
-    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white">
-        <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-sky-600">Panel Admin</p>
-                <h1 class="text-2xl font-black text-slate-900">Kelola User</h1>
-            </div>
-            <nav class="flex flex-wrap gap-3">
-                <a href="/" class="rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50">Dashboard</a>
-                <a href="{{ route('admin.calendar') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50">Kalender</a>
-                <a href="{{ route('admin.activity-logs') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50">Audit Log</a>
-            </nav>
-        </div>
-    </header>
+<body class="page-wrap">
+    <x-admin-header title="Kelola User" active="users" />
 
-    <main class="mx-auto max-w-7xl px-4 py-8">
+    <main id="main" class="shell animate-fade-in px-4 py-8">
         @if(session('success'))
-            <div class="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 font-semibold text-emerald-700">
-                {{ session('success') }}
-            </div>
+            <x-toast type="success" :message="session('success')" />
         @endif
 
         @if($errors->any())
-            <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                @foreach($errors->all() as $error)
-                    <p>{{ $error }}</p>
-                @endforeach
-            </div>
+            <x-toast type="error" :message="implode(' ', $errors->all())" />
         @endif
 
-        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
-            <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        @php
+            $totalUsers = $users->count();
+            $adminCount = $users->where('role', 'admin')->count();
+            $regularCount = $totalUsers - $adminCount;
+        @endphp
+
+        <section class="hero-card animate-scale-in rounded-[34px] p-6 md:p-8">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <h2 class="text-2xl font-black text-slate-900">Database Pengguna</h2>
-                    <p class="mt-1 text-sm text-slate-600">Admin dapat mengubah nama, email, role, dan reset password user.</p>
+                    <span class="eyebrow">Manajemen Akun</span>
+                    <h2 class="section-title mt-4">Database Pengguna</h2>
+                    <p class="section-copy mt-2">Ubah nama, email, peran, dan reset password pengguna dari satu tempat.</p>
                 </div>
-                <form method="GET" action="{{ route('admin.users.index') }}" class="flex gap-3">
-                    <input type="text" name="search" value="{{ $search }}" class="form-input min-w-[260px]" placeholder="Cari nama, email, role...">
-                    <button class="rounded-xl bg-sky-600 px-5 py-3 font-bold text-white hover:bg-sky-700">Cari</button>
+
+                <form method="GET" action="{{ route('admin.users.index') }}" class="flex w-full gap-3 lg:w-auto">
+                    <label for="search" class="sr-only">Cari pengguna</label>
+                    <input id="search" type="text" name="search" value="{{ $search }}" placeholder="Cari nama, email, role..." class="form-input min-w-[240px] flex-1">
+                    <button type="submit" class="btn-primary whitespace-nowrap">Cari</button>
                 </form>
             </div>
 
-            <div class="mt-6 space-y-4">
+            <div class="mt-6 grid gap-4 sm:grid-cols-3">
+                <article class="metric-card">
+                    <p class="tracking-20 text-xs font-semibold uppercase text-slate-400">Total Pengguna</p>
+                    <p class="mt-3 text-3xl font-black text-slate-950">{{ $totalUsers }}</p>
+                </article>
+                <article class="metric-card">
+                    <p class="tracking-20 text-xs font-semibold uppercase text-slate-400">Admin</p>
+                    <p class="mt-3 text-3xl font-black text-slate-950">{{ $adminCount }}</p>
+                </article>
+                <article class="metric-card">
+                    <p class="tracking-20 text-xs font-semibold uppercase text-slate-400">User</p>
+                    <p class="mt-3 text-3xl font-black text-slate-950">{{ $regularCount }}</p>
+                </article>
+            </div>
+        </section>
+
+        @if($users->isEmpty())
+            <div class="mt-6">
+                <x-empty-state
+                    icon="👥"
+                    title="Tidak ada pengguna ditemukan"
+                    description="{{ $search ? 'Coba kata kunci pencarian yang berbeda.' : 'Belum ada pengguna terdaftar dalam sistem.' }}" />
+            </div>
+        @else
+            <div class="stagger mt-6 space-y-4" data-stagger>
                 @foreach($users as $user)
-                    <form method="POST" action="{{ route('admin.users.update', $user) }}" class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <form method="POST" action="{{ route('admin.users.update', $user) }}" data-loading-on-submit class="feature-card rounded-3xl p-5 transition duration-300 hover:shadow-[0_22px_50px_rgba(15,23,42,0.10)]">
                         @csrf
                         @method('PUT')
 
-                        <div class="grid gap-4 lg:grid-cols-[1fr_1fr_170px_1fr]">
+                        <div class="flex flex-wrap items-center gap-4 border-b border-slate-200/70 pb-4">
+                            <x-avatar :name="$user->name" size="md" />
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-lg font-bold text-slate-950">{{ $user->name }}</p>
+                                <p class="truncate text-sm text-slate-500">{{ $user->email }}</p>
+                            </div>
+                            <span class="rounded-full px-3 py-1 text-xs font-bold {{ $user->role === 'admin' ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600' }}">
+                                {{ $user->role === 'admin' ? 'Admin' : 'User' }}
+                            </span>
+                            <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-slate-600">{{ $user->bookings_count }} booking</span>
+                        </div>
+
+                        <div class="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr_170px]">
                             <div>
-                                <label class="mb-2 block text-sm font-semibold text-slate-700">Nama</label>
-                                <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-input">
+                                <label for="name-{{ $user->id }}" class="mb-2 block text-sm font-semibold text-slate-700">Nama</label>
+                                <input id="name-{{ $user->id }}" type="text" name="name" value="{{ old('name', $user->name) }}" class="form-input">
                             </div>
                             <div>
-                                <label class="mb-2 block text-sm font-semibold text-slate-700">Email</label>
-                                <input type="email" name="email" value="{{ old('email', $user->email) }}" class="form-input">
+                                <label for="email-{{ $user->id }}" class="mb-2 block text-sm font-semibold text-slate-700">Email</label>
+                                <input id="email-{{ $user->id }}" type="email" name="email" value="{{ old('email', $user->email) }}" class="form-input">
                             </div>
                             <div>
-                                <label class="mb-2 block text-sm font-semibold text-slate-700">Role</label>
-                                <select name="role" class="form-input">
+                                <label for="role-{{ $user->id }}" class="mb-2 block text-sm font-semibold text-slate-700">Role</label>
+                                <select id="role-{{ $user->id }}" name="role" class="form-input">
                                     <option value="user" @selected($user->role === 'user')>User</option>
                                     <option value="admin" @selected($user->role === 'admin')>Admin</option>
                                 </select>
-                            </div>
-                            <div>
-                                <label class="mb-2 block text-sm font-semibold text-slate-700">Total Booking</label>
-                                <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 font-black text-slate-900">{{ $user->bookings_count }}</div>
                             </div>
                         </div>
 
                         <div class="mt-4 grid gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
                             <div>
-                                <label class="mb-2 block text-sm font-semibold text-slate-700">Password Baru</label>
-                                <input type="password" name="password" class="form-input" placeholder="Kosongkan jika tidak diganti">
+                                <label for="password-{{ $user->id }}" class="mb-2 block text-sm font-semibold text-slate-700">Password Baru</label>
+                                <input id="password-{{ $user->id }}" type="password" name="password" autocomplete="new-password" class="form-input" placeholder="Kosongkan jika tidak diganti">
                             </div>
                             <div>
-                                <label class="mb-2 block text-sm font-semibold text-slate-700">Konfirmasi Password</label>
-                                <input type="password" name="password_confirmation" class="form-input" placeholder="Ulangi password baru">
+                                <label for="password_confirmation-{{ $user->id }}" class="mb-2 block text-sm font-semibold text-slate-700">Konfirmasi Password</label>
+                                <input id="password_confirmation-{{ $user->id }}" type="password" name="password_confirmation" autocomplete="new-password" class="form-input" placeholder="Ulangi password baru">
                             </div>
-                            <button class="rounded-xl bg-slate-900 px-5 py-3 font-bold text-white hover:bg-slate-800">
-                                Simpan User
-                            </button>
+                            <button type="submit" class="btn-primary whitespace-nowrap">Simpan User</button>
                         </div>
                     </form>
                 @endforeach
             </div>
-        </section>
+        @endif
     </main>
 </body>
 </html>

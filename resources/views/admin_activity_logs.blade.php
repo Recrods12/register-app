@@ -5,55 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Log - Booking Ruang Rapat</title>
     @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
-<body class="bg-slate-50">
-    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white">
-        <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+<body class="page-wrap">
+    <x-admin-header title="Audit Log" active="logs" />
+
+    <main id="main" class="shell animate-fade-in px-4 py-8">
+        @php
+            $initialLogs = $logs->take(3);
+            $restLogs = $logs->slice(3);
+        @endphp
+
+        <section class="hero-card animate-scale-in rounded-[34px] p-6 md:p-8">
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-sky-600">Panel Admin</p>
-                <h1 class="text-2xl font-black text-slate-900">Audit Log</h1>
-            </div>
-            <nav class="flex flex-wrap gap-3">
-                <a href="/" class="rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50">Dashboard</a>
-                <a href="{{ route('admin.users.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50">Kelola User</a>
-                <a href="{{ route('admin.calendar') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 font-bold text-slate-700 hover:bg-slate-50">Kalender</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="mx-auto max-w-7xl px-4 py-8">
-        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
-            <div class="mb-6">
-                <h2 class="text-2xl font-black text-slate-900">Riwayat Aktivitas Sistem</h2>
-                <p class="mt-1 text-sm text-slate-600">Mencatat aktivitas penting seperti membuat, mengubah, menghapus booking, dan update user.</p>
+                <span class="eyebrow">Keamanan &amp; Traceability</span>
+                <h2 class="section-title mt-4">Riwayat Aktivitas Sistem</h2>
+                <p class="section-copy mt-2">Mencatat aktivitas penting seperti membuat, mengubah, menghapus booking, dan pembaruan akun pengguna.</p>
             </div>
 
-            <div class="space-y-3">
-                @forelse($logs as $log)
-                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                            <div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-black uppercase text-sky-700">{{ str_replace('_', ' ', $log->action) }}</span>
-                                    <p class="font-bold text-slate-900">{{ $log->message }}</p>
-                                </div>
-                                <p class="mt-2 text-sm text-slate-600">
-                                    Oleh: {{ $log->user?->name ?? 'Sistem' }}
-                                    @if($log->booking?->room)
-                                        | Booking: {{ $log->booking->room->name }} - {{ $log->booking->title }}
-                                    @endif
-                                </p>
-                            </div>
-                            <p class="text-sm font-semibold text-slate-500">{{ $log->created_at->format('d M Y H:i') }}</p>
-                        </div>
-                    </div>
-                @empty
-                    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500">
-                        Belum ada aktivitas yang tercatat.
-                    </div>
-                @endforelse
+            <div class="mt-6 grid gap-4 sm:grid-cols-3">
+                <article class="metric-card">
+                    <p class="tracking-20 text-xs font-semibold uppercase text-slate-400">Total Aktivitas</p>
+                    <p class="mt-3 text-3xl font-black text-slate-950">{{ $logs->count() }}</p>
+                </article>
+                <article class="metric-card">
+                    <p class="tracking-20 text-xs font-semibold uppercase text-slate-400">Hari Ini</p>
+                    <p class="mt-3 text-3xl font-black text-slate-950">{{ $logs->filter(fn ($log) => $log->created_at->isToday())->count() }}</p>
+                </article>
+                <article class="metric-card">
+                    <p class="tracking-20 text-xs font-semibold uppercase text-slate-400">Terkait Booking</p>
+                    <p class="mt-3 text-3xl font-black text-slate-950">{{ $logs->filter(fn ($log) => $log->booking_id)->count() }}</p>
+                </article>
             </div>
         </section>
+
+        @if($logs->isEmpty())
+            <div class="mt-6">
+                <x-empty-state
+                    icon="📝"
+                    title="Belum ada aktivitas tercatat"
+                    description="Riwayat aktivitas sistem akan muncul di sini ketika ada perubahan pada booking atau akun." />
+            </div>
+        @else
+            <div class="stagger mt-6 space-y-4" data-stagger>
+                @foreach($initialLogs as $log)
+                    <x-log-item :log="$log" />
+                @endforeach
+            </div>
+
+            @if($restLogs->isNotEmpty())
+                <div id="extra-logs" class="mt-6 hidden space-y-4" aria-hidden="true">
+                    @foreach($restLogs as $log)
+                        <x-log-item :log="$log" class="animate-fade-in-up" />
+                    @endforeach
+                </div>
+
+                <div class="mt-6 flex justify-center">
+                    <button
+                        id="see-more-logs"
+                        type="button"
+                        class="btn-soft"
+                        aria-expanded="false"
+                        aria-controls="extra-logs"
+                    >
+                        Lihat selengkapnya ({{ $restLogs->count() }})
+                    </button>
+                </div>
+            @endif
+        @endif
     </main>
+
+    <script>
+        (function () {
+            const btn = document.getElementById('see-more-logs');
+            const extra = document.getElementById('extra-logs');
+            if (!btn || !extra) return;
+
+            btn.addEventListener('click', function () {
+                const isHidden = extra.classList.toggle('hidden');
+                extra.setAttribute('aria-hidden', String(isHidden));
+                btn.setAttribute('aria-expanded', String(!isHidden));
+                btn.textContent = isHidden
+                    ? 'Lihat selengkapnya ({{ $restLogs->count() }})'
+                    : 'Sembunyikan';
+
+                if (!isHidden) {
+                    extra.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

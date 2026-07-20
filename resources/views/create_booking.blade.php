@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buat Booking</title>
     @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
 <body class="bg-slate-50">
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
@@ -27,7 +28,7 @@
         </div>
 
         @if($errors->any())
-            <div class="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3">
+            <div data-toast class="toast-enter mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3">
                 <p class="font-bold text-red-900 mb-2">Terjadi Kesalahan:</p>
                 @foreach($errors->all() as $error)
                     <p class="text-sm text-red-700">• {{ $error }}</p>
@@ -35,7 +36,7 @@
             </div>
         @endif
 
-        <form method="POST" action="/bookings" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+        <form method="POST" action="/bookings" class="animate-fade-in-up bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
             @csrf
 
             @if($isAdmin)
@@ -63,7 +64,7 @@
                     <h3 class="text-xl font-bold text-slate-900">Pilih Ruang Rapat</h3>
                 </div>
 
-                <div class="grid gap-3">
+                <div class="stagger grid gap-3" data-stagger>
                     @foreach($rooms as $room)
                         <label class="relative flex items-center p-4 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-sky-400 transition">
                             <input type="radio" name="room_id" value="{{ $room->id }}" required @checked(old('room_id', request('room_id')) == $room->id) class="w-4 h-4 text-sky-600">

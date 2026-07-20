@@ -129,7 +129,7 @@ class DashboardController extends Controller
             'upcomingBookingsList' => $allBookings->filter(fn (Booking $booking) => $booking->isUpcoming())->take(8),
             'reportBookings' => $reportBookings,
             'users' => User::orderBy('name')->get(),
-            'activityLogs' => ActivityLog::with(['user', 'booking.room'])->latest()->limit(8)->get(),
+            'activityLogs' => ActivityLog::with(['user', 'booking.room'])->latest()->limit(3)->get(),
             'filters' => [
                 'start_date' => $startDate,
                 'end_date' => $endDate,

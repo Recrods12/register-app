@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Booking Ruang Rapat</title>
     @vite('resources/css/app.css')
+    @vite('resources/js/app.js')
 </head>
 <body class="page-wrap">
     <div class="shell py-6">
@@ -30,7 +31,11 @@
         </header>
     </div>
 
-    <main class="shell flex min-h-[calc(100vh-116px)] items-center justify-center pb-10 pt-4">
+    <main class="shell flex min-h-[calc(100vh-116px)] flex-col items-center justify-center gap-4 pb-10 pt-4">
+        @if ($errors->any())
+            <x-toast type="error" :message="implode(' ', $errors->all())" />
+        @endif
+
         <section class="float-in-delay grid w-full max-w-6xl gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
             <div class="hero-card relative hidden overflow-hidden rounded-[34px] p-9 lg:flex lg:flex-col lg:justify-between">
                 <div>
@@ -111,19 +116,8 @@
                             Akses dashboard booking untuk memantau ruang aktif, melihat jadwal tim, dan mengelola perubahan reservasi dengan lebih mudah.
                         </p>
 
-                        @if ($errors->any())
-                            <div class="mt-6 rounded-[24px] border border-red-200 bg-red-50 px-4 py-4">
-                                <p class="text-sm font-bold text-red-700">Login belum berhasil</p>
-                                <div class="mt-2 space-y-1">
-                                    @foreach ($errors->all() as $error)
-                                        <p class="text-sm text-red-600">{{ $error }}</p>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
                         <div class="mt-8 rounded-[30px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_28px_60px_rgba(15,23,42,0.08)] sm:p-6">
-                            <form method="POST" action="/login" class="space-y-5">
+                            <form method="POST" action="/login" data-loading-on-submit class="space-y-5">
                                 @csrf
 
                                 <div>
@@ -135,6 +129,7 @@
                                         id="email"
                                         name="email"
                                         value="{{ old('email') }}"
+                                        autocomplete="email"
                                         required
                                         placeholder="nama@perusahaan.com"
                                         class="form-input"
@@ -152,6 +147,7 @@
                                         type="password"
                                         id="password"
                                         name="password"
+                                        autocomplete="current-password"
                                         required
                                         placeholder="Masukkan password"
                                         class="form-input"

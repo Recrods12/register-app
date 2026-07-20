@@ -96,7 +96,7 @@ class AdminController extends Controller
     public function activityLogs(): View
     {
         return view('admin_activity_logs', [
-            'logs' => ActivityLog::with(['user', 'booking.room'])->latest()->limit(100)->get(),
+            'logs' => ActivityLog::with(['user', 'booking.room'])->latest()->get(),
         ]);
     }
 

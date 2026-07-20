@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BookingController;
 use App\Models\Product;
 use App\Models\User;
@@ -40,6 +41,9 @@ Route::get('/bookings', [BookingController::class, 'index'])->middleware('auth')
 Route::get('/bookings/create', [BookingController::class, 'create'])->middleware('auth')->name('bookings.create');
 Route::post('/bookings', [BookingController::class, 'store'])->middleware('auth')->name('bookings.store');
 Route::get('/bookings/{booking}/edit', [BookingController::class, 'edit'])->middleware('auth')->name('bookings.edit');
+Route::get('/bookings/{booking}/activity', [BookingController::class, 'showActivity'])->middleware('auth')->name('bookings.activity');
+Route::post('/bookings/{booking}/activity', [BookingController::class, 'storeActivity'])->middleware('auth')->name('bookings.activity.store');
+Route::delete('/bookings/{booking}/activity', [BookingController::class, 'deleteActivity'])->middleware('auth')->name('bookings.activity.delete');
 Route::put('/bookings/{booking}', [BookingController::class, 'update'])->middleware('auth')->name('bookings.update');
 Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->middleware('auth')->name('bookings.destroy');
 
@@ -57,3 +61,13 @@ Route::delete('/products/{id}', [ProductController::class, 'destroy'])->middlewa
 
 // DETAIL
 Route::get('/products/{id}', [ProductController::class, 'show'])->middleware('auth');
+
+// ADMIN routes (user management, calendar, activity logs, backup)
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users.index');
+    Route::put('/admin/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    Route::get('/admin/calendar', [AdminController::class, 'calendar'])->name('admin.calendar');
+    Route::get('/admin/activity-logs', [AdminController::class, 'activityLogs'])->name('admin.activity-logs');
+    Route::get('/admin/backup', [AdminController::class, 'backup'])->name('admin.backup');
+    Route::get('/bookings/export', [AdminController::class, 'backup'])->name('bookings.export');
+});
